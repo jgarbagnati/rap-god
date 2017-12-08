@@ -47,22 +47,18 @@ export default class Boteezy extends Component {
 		
 		let hook = [];
 		let hookLen = Math.ceil(Math.random() * 2) + 2;
-		for (let i = 0; i < hookLen; ++i) {
+		for (let i = 0; i < hookLen; ++i)
 			hook.push(this.generateLine(lyrics));
-			console.log(hook[i]);
-		}
 		
 		let rap = [];
 		let rapLen = Math.ceil(Math.random() * 50) + 25;
 		let hooks = Math.ceil(Math.random() * 5) + 1;
 		let hookOffset = Math.floor(rapLen / hooks);
 		let hookCounter = Math.floor(Math.random() * rapLen) % hookOffset;
-		console.log(rapLen, hooks, hookCounter)
 		
 		for (let i = 0; i < rapLen; ++i) {
 			rap.push(this.generateLine(lyrics));
 			if (--hookCounter <= 0) {
-				console.log('hook')
 				// Generate from above offset
 				if (i != 0) rap.push(<br />);
 				for (let j = 0; j < hookLen; ++j) {
@@ -88,19 +84,20 @@ export default class Boteezy extends Component {
 
 	// Post processing
 	postProcessLyrics(input) {
-		return this.processSizeLimit(input);
+		return this.processSizeLimit(input,
+			this.checkLowerBound, this.checkUpperBound);
 	}
 
-	processSizeLimit(input) {
+	processSizeLimit(input, upperbound, lowerbound) {
 		let temp = "";
 		let split = input.split('/');
 		for (let i = 0; i < split.length; ++i) {
 			let str = split[i];
-			if (this.checkLength(str)) {
+			if (this.checkLength(str, upperbound, lowerbound)) {
 				return str;
-			} else if (this.checkLength(temp + str)) {
+			} else if (this.checkLength(temp + str, upperbound, lowerbound)) {
 				return temp + str;
-			} else if (this.checkLowerBound(str) || this.checkLowerBound(temp + str)) {
+			} else if (lowerbound(str) || lowerbound(temp + str)) {
 				temp += str;
 			} else {
 				temp = "";
@@ -120,8 +117,8 @@ export default class Boteezy extends Component {
 	}
 
 	// Check if we're between 100 and 140 characters.
-	checkLength(str) {
-		return this.checkLowerBound(str) && this.checkUpperBound(str);
+	checkLength(str, upperbound, lowerbound) {
+		return lowerbound(str) && upperbound(str);
 	}
 	
 	displayLyrics() {
