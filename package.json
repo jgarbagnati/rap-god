@@ -1,0 +1,46 @@
+{
+  "name": "boteezy",
+  "version": "1.0.0",
+  "description": "Rap God aka 'Boteezy'",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run buildSass && npm run webpack && npm run copyRsrc",
+    "buildProd": "npm run buildSass && webpack && npm run copyRsrc",
+    "webpack": "webpack --config webpack.config.dev.js",
+    "buildSass": "node-sass --include-path scss ./src/index.scss ./build/css/index.css --output-style compressed",
+    "copyRsrc": "cp -a ./src/res/. ./build/res/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CarpeSwag/rap-god.git"
+  },
+  "keywords": [
+    "decleat",
+    "mobile",
+    "hybrid"
+  ],
+  "author": "Alexandro Soto and James Garbagnati",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/CarpeSwag/rap-god/issues"
+  },
+  "homepage": "https://github.com/CarpeSwag/rap-god#readme",
+  "dependencies": {
+    "inferno": "^3.9.0",
+    "inferno-component": "^3.9.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-inferno": "^3.2.0",
+    "babel-preset-es2015": "^6.24.1",
+    "css-loader": "^0.28.7",
+    "html-minifier": "^3.5.5",
+    "html-minifier-loader": "^1.4.0",
+    "html-webpack-plugin": "^2.30.1",
+    "node-sass": "^4.5.3",
+    "sass-loader": "^6.0.6",
+    "script-loader": "^0.7.2",
+    "webpack": "^3.6.0"
+  }
+}
