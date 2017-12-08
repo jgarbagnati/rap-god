@@ -2,36 +2,37 @@ import Inferno from 'inferno';
 import Component from 'inferno-component';
 import Options from './components/Options';
 import Tracery from './lib/tracery';
-import Rules from './lib/rules';
+import Lyrics from './lib/lyrics';
 
 export default class Boteezy extends Component {
 	constructor(props) {
 		super(props);
 		
-		let grammars = {};
+		let lyrics = {};
 		let options = [];
 		let defaultOption = '';
 		let rule = '';
-		for (rule in Rules) {
+		for (rule in Lyrics) {
 			if (rule === 'defaultOption') {
-				defaultOption = Rules[rule];
-				console.log(defaultOption);
+				defaultOption = Lyrics[rule];
 			} else {
 				options.push(rule);
-				grammars[rule] = Tracery.createGrammar(Rules[rule]);
+				lyrics[rule] = Tracery.createGrammar(Lyrics[rule]);
 			}
 		}
 		
 		this.state = {
-			blurbs: [],
+			title: '',
+			rap: [],
 			postCount: 0,
 			options: options,
-			grammars: grammars,
+			titles: [],
+			lyrics: lyrics,
 			currOption: defaultOption
 		};
 		
 		this.selectGrammar = this.selectGrammar.bind(this);
-		this.generateLyrics = this.generateLyrics.bind(this);
+		this.generateRap = this.generateRap.bind(this);
 		this.displayLyrics = this.displayLyrics.bind(this);
 	}
 	
@@ -41,40 +42,44 @@ export default class Boteezy extends Component {
 		});
 	}
 	
-	generateLyrics(evt) {
-		let grammar = this.state.grammars[this.state.currOption];
-		let generated = this.generate(grammar);
-		this.state.blurbs.push(generated);
+	generateRap(evt) {
+		let lyrics = this.state.lyrics[this.state.currOption];
+		let rap = [];
+		let lines = Math.ceil(Math.random() * 50) + 50;
+		for (let i = 0; i < lines; ++i) {
+			rap.push(this.generateLine(lyrics));
+		}
 		
 		this.setState({
-			postCount: this.state.postCount + 1
+			rap: rap
 		});
 	}
 	
-	generate(grammar) {
+	generateLine(grammar) {
 		let gen = '';
 		do {
-			gen = this.postProcess(grammar.flatten('#origin#'))
+			gen = this.postProcessLyrics(grammar.flatten('#origin#'));
 		} while (gen.length == 0);
 		return gen;
 	}
 
 	// Post processing
-	postProcess(input) {
+	postProcessLyrics(input) {
 		return this.processSizeLimit(input);
 	}
 
 	processSizeLimit(input) {
+		console.log(input);
 		let temp = "";
-		let split = input.split('.');
+		let split = input.split('/');
 		for (let i = 0; i < split.length; ++i) {
 			let str = split[i];
-			if (this.checkLength(str + '.')) {
-				return str + '.';
-			} else if (this.checkLength(temp + str + '.')) {
-				return temp + str + '.';
-			} else if (this.checkLowerBound(str + '.') || this.checkLowerBound(temp + str + '.')) {
-				temp += str + '.';
+			if (this.checkLength(str)) {
+				return str;
+			} else if (this.checkLength(temp + str)) {
+				return temp + str;
+			} else if (this.checkLowerBound(str) || this.checkLowerBound(temp + str)) {
+				temp += str;
 			} else {
 				temp = "";
 			}
@@ -84,12 +89,12 @@ export default class Boteezy extends Component {
 
 	// Check lower bound
 	checkLowerBound(str) {
-		return !(str.length < 60);
+		return !(str.length < 20);
 	}
 
 	// Check upper bound
 	checkUpperBound(str) {
-		return !(str.length > 140);
+		return !(str.length > 80);
 	}
 
 	// Check if we're between 100 and 140 characters.
@@ -99,16 +104,16 @@ export default class Boteezy extends Component {
 	
 	displayLyrics() {
 		let out = [];
-		let i = this.state.blurbs.length;
+		let i = this.state.rap.length;
 		while (i --> 0) {
-			let blurb = (
+			let line = (
 				<div key={i}
-					 className='blurb'>
-					{this.state.blurbs[i]}
+					 className='line'>
+					{this.state.rap[i]}
 				</div>
 			);
 			
-			out.push(blurb);
+			out.push(line);
 		}
 		return out;
 	}
@@ -117,9 +122,10 @@ export default class Boteezy extends Component {
 		return (
 			<div id='inferno-root'>
 				<div className='lyricBlock'>
-					<div onclick={this.generateLyrics}>
+					<div onclick={this.generateRap}>
 						<h1> Generate </h1>
 					</div>
+					{this.state.title}
 					{this.displayLyrics()}
 				</div>
 				<Options selectGrammar={this.selectGrammar}
