@@ -3,7 +3,7 @@ npm-debug.log
 
 # Avoid putting copyrighted materials in the GitHub repo
 
-src/lib/source.txt
+src/lib/source_files/*
 src/lib/rules.js
 
 # Build files
