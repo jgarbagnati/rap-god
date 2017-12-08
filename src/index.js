@@ -68,9 +68,6 @@ export default class Boteezy extends Component {
 			featuring = artists[artists.length * Math.random() << 0];
 		}
 		
-		// Generate the title
-		let title = hook[Math.random() * hookLen << 0];
-		
 		for (let i = 0; i < rapLen; ++i) {
 			rap.push(this.generateLine(lyrics));
 			if (--hookCounter <= 0) {
@@ -91,6 +88,10 @@ export default class Boteezy extends Component {
 				}
 			}
 		}
+		
+		// Generate the title
+		let title = hook[Math.random() * hookLen << 0];
+		title += (hasFeatured)? " (ft. " + featuring + ")":"";
 		
 		this.setState({
 			title: title,
