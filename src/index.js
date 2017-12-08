@@ -43,18 +43,35 @@ export default class Boteezy extends Component {
 	}
 	
 	generateRap(evt) {
-		let lyrics = this.state.lyrics[this.state.currOption];
+		let artists = Object.keys(this.state.lyrics);
+		let artist = this.state.currOption;
+		let lyrics = this.state.lyrics[artist];
 		
+		// Generate the hook
 		let hook = [];
 		let hookLen = Math.ceil(Math.random() * 2) + 2;
 		for (let i = 0; i < hookLen; ++i)
 			hook.push(this.generateLine(lyrics));
 		
+		// Generate the title
+		let title = hook[Math.random() * hookLen << 0];
+		console.log(title);
+		
+		// Set up rap generation
 		let rap = [];
 		let rapLen = Math.ceil(Math.random() * 50) + 25;
 		let hooks = Math.ceil(Math.random() * 5) + 1;
 		let hookOffset = Math.floor(rapLen / hooks);
 		let hookCounter = Math.floor(Math.random() * rapLen) % hookOffset;
+		
+		// Add featuring?
+		let isFeaturing = (Math.random() * 4 << 0) == 0;
+		let featuring = artist;
+		let hasFeatured = false;
+		while (isFeaturing && featuring === artist) {
+			featuring = artists[artists.length * Math.random() << 0];
+		}
+		if (isFeaturing) console.log(featuring);
 		
 		for (let i = 0; i < rapLen; ++i) {
 			rap.push(this.generateLine(lyrics));
@@ -66,11 +83,20 @@ export default class Boteezy extends Component {
 				}
 				if (i != rapLen - 1) rap.push(<br />);
 				hookCounter = hookOffset + Math.ceil(Math.random() * hookOffset/2 - hookOffset/4);
+				
+				if (isFeaturing && !hasFeatured) {
+					rap.push(<b>{featuring}:</b>);
+					hasFeatured = true;
+					lyrics = this.state.lyrics[featuring];
+				} else {
+					lyrics = this.state.lyrics[artist];
+				}
 			}
 		}
 		
 		this.setState({
-			rap: rap
+			title: title,
+			rap: rap.reverse()
 		});
 	}
 	
@@ -85,9 +111,10 @@ export default class Boteezy extends Component {
 	// Post processing
 	postProcessLyrics(input) {
 		return this.processSizeLimit(input,
-			this.checkLowerBound, this.checkUpperBound);
+			function(str) {return !(str.length > 80);},
+			function(str) {return !(str.length < 20);});
 	}
-
+	
 	processSizeLimit(input, upperbound, lowerbound) {
 		let temp = "";
 		let split = input.split('/');
@@ -104,16 +131,6 @@ export default class Boteezy extends Component {
 			}
 		}
 		return "";
-	}
-
-	// Check lower bound
-	checkLowerBound(str) {
-		return !(str.length < 20);
-	}
-
-	// Check upper bound
-	checkUpperBound(str) {
-		return !(str.length > 80);
 	}
 
 	// Check if we're between 100 and 140 characters.
