@@ -1,6 +1,11 @@
 node_modules/*
 npm-debug.log
 
+# Avoid putting copyrighted materials in the GitHub repo
+
+src/lib/source.txt
+src/lib/rules.js
+
 # Build files
 
 build/*
