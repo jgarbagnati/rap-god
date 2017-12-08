@@ -68,11 +68,14 @@ export default class Boteezy extends Component {
 			featuring = artists[artists.length * Math.random() << 0];
 		}
 		
+		if (hookCounter > 0 && isFeaturing) rap.push(<b>{artist}:</b>);
 		for (let i = 0; i < rapLen; ++i) {
-			rap.push(this.generateLine(lyrics));
 			if (--hookCounter <= 0) {
 				// Generate from above offset
 				if (i != 0) rap.push(<br />);
+				rap.push((isFeaturing)? 
+					(<b>Hook ({artist}):</b>):
+					(<b>Hook:</b>));
 				for (let j = 0; j < hookLen; ++j) {
 					rap.push(hook[j]);
 				}
@@ -84,8 +87,11 @@ export default class Boteezy extends Component {
 					hasFeatured = true;
 					lyrics = this.state.lyrics[featuring];
 				} else {
+					if (isFeaturing) rap.push(<b>{artist}:</b>);
 					lyrics = this.state.lyrics[artist];
 				}
+			} else {
+				rap.push(this.generateLine(lyrics));
 			}
 		}
 		
