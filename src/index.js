@@ -53,10 +53,6 @@ export default class Boteezy extends Component {
 		for (let i = 0; i < hookLen; ++i)
 			hook.push(this.generateLine(lyrics));
 		
-		// Generate the title
-		let title = hook[Math.random() * hookLen << 0];
-		console.log(title);
-		
 		// Set up rap generation
 		let rap = [];
 		let rapLen = Math.ceil(Math.random() * 50) + 25;
@@ -71,7 +67,9 @@ export default class Boteezy extends Component {
 		while (isFeaturing && featuring === artist) {
 			featuring = artists[artists.length * Math.random() << 0];
 		}
-		if (isFeaturing) console.log(featuring);
+		
+		// Generate the title
+		let title = hook[Math.random() * hookLen << 0];
 		
 		for (let i = 0; i < rapLen; ++i) {
 			rap.push(this.generateLine(lyrics));
@@ -84,7 +82,7 @@ export default class Boteezy extends Component {
 				if (i != rapLen - 1) rap.push(<br />);
 				hookCounter = hookOffset + Math.ceil(Math.random() * hookOffset/2 - hookOffset/4);
 				
-				if (isFeaturing && !hasFeatured) {
+				if (isFeaturing && !hasFeatured && (Math.random() * 2 << 0) == 0) {
 					rap.push(<b>{featuring}:</b>);
 					hasFeatured = true;
 					lyrics = this.state.lyrics[featuring];
@@ -161,7 +159,7 @@ export default class Boteezy extends Component {
 					<div onclick={this.generateRap}>
 						<h1> Generate </h1>
 					</div>
-					{this.state.title}
+					<h3>{this.state.title}</h3>
 					{this.displayLyrics()}
 				</div>
 				<Options selectGrammar={this.selectGrammar}
