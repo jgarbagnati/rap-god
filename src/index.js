@@ -44,10 +44,33 @@ export default class Boteezy extends Component {
 	
 	generateRap(evt) {
 		let lyrics = this.state.lyrics[this.state.currOption];
+		
+		let hook = [];
+		let hookLen = Math.ceil(Math.random() * 2) + 2;
+		for (let i = 0; i < hookLen; ++i) {
+			hook.push(this.generateLine(lyrics));
+			console.log(hook[i]);
+		}
+		
 		let rap = [];
-		let lines = Math.ceil(Math.random() * 50) + 50;
-		for (let i = 0; i < lines; ++i) {
+		let rapLen = Math.ceil(Math.random() * 50) + 25;
+		let hooks = Math.ceil(Math.random() * 5) + 1;
+		let hookOffset = Math.floor(rapLen / hooks);
+		let hookCounter = Math.floor(Math.random() * rapLen) % hookOffset;
+		console.log(rapLen, hooks, hookCounter)
+		
+		for (let i = 0; i < rapLen; ++i) {
 			rap.push(this.generateLine(lyrics));
+			if (--hookCounter <= 0) {
+				console.log('hook')
+				// Generate from above offset
+				if (i != 0) rap.push(<br />);
+				for (let j = 0; j < hookLen; ++j) {
+					rap.push(hook[j]);
+				}
+				if (i != rapLen - 1) rap.push(<br />);
+				hookCounter = hookOffset + Math.ceil(Math.random() * hookOffset/2 - hookOffset/4);
+			}
 		}
 		
 		this.setState({
@@ -69,7 +92,6 @@ export default class Boteezy extends Component {
 	}
 
 	processSizeLimit(input) {
-		console.log(input);
 		let temp = "";
 		let split = input.split('/');
 		for (let i = 0; i < split.length; ++i) {
