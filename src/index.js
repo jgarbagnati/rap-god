@@ -45,13 +45,6 @@ export default class Boteezy extends Component {
 	generateRap(evt) {
 		let artists = Object.keys(this.state.lyrics);
 		let artist = this.state.currOption;
-		let lyrics = this.state.lyrics[artist];
-		
-		// Generate the hook
-		let hook = [];
-		let hookLen = Math.ceil(Math.random() * 2) + 2;
-		for (let i = 0; i < hookLen; ++i)
-			hook.push(this.generateLine(lyrics));
 		
 		// Set up rap generation
 		let rap = [];
@@ -68,14 +61,23 @@ export default class Boteezy extends Component {
 			featuring = artists[artists.length * Math.random() << 0];
 		}
 		
+		// Generate the hook
+		let hook = [];
+		let hookLen = Math.ceil(Math.random() * 2) + 2;
+		let featuredHook = isFeaturing && (Math.random() * 4 << 0) == 0;
+		let lyrics = (featuredHook)? this.state.lyrics[featuring]:
+			this.state.lyrics[artist];
+		for (let i = 0; i < hookLen; ++i)
+			hook.push(this.generateLine(lyrics));
+		let hookArtist = (featuredHook)? featuring: artist;
+		
 		if (hookCounter > 0 && isFeaturing) rap.push(<b>{artist}:</b>);
+		lyrics = this.state.lyrics[artist];
 		for (let i = 0; i < rapLen; ++i) {
 			if (--hookCounter <= 0) {
 				// Generate from above offset
 				if (i != 0) rap.push(<br />);
-				rap.push((isFeaturing)? 
-					(<b>Hook ({artist}):</b>):
-					(<b>Hook:</b>));
+				if (isFeaturing) rap.push(<b>Hook ({hookArtist}):</b>);
 				for (let j = 0; j < hookLen; ++j) {
 					rap.push(hook[j]);
 				}
@@ -166,6 +168,7 @@ export default class Boteezy extends Component {
 					<div onclick={this.generateRap}>
 						<h1> Generate </h1>
 					</div>
+					<h3>{this.state.currOption}</h3>
 					<h3>{this.state.title}</h3>
 					{this.displayLyrics()}
 				</div>
