@@ -46,6 +46,7 @@ export default class Boteezy extends Component {
 			options: options,
 			titles: [],
 			lyrics: lyrics,
+			showLyrics: true,
 			lineNode: null,
 			lastLine: "",
 			currLine: "",
@@ -58,8 +59,9 @@ export default class Boteezy extends Component {
 		this.state.rap = rap.rap;
 		
 		this.playRap = this.playRap.bind(this);
-		this.selectGrammar = this.selectGrammar.bind(this);
+		this.toggleLyrics = this.toggleLyrics.bind(this);
 		this.generateNewRap = this.generateNewRap.bind(this);
+		this.selectGrammar = this.selectGrammar.bind(this);
 		this.displayLyrics = this.displayLyrics.bind(this);
 	}
 	
@@ -96,6 +98,11 @@ export default class Boteezy extends Component {
 							nextLine: nextLine.nextLine,
 						});
 						window.speechSynthesis.speak(nextLine);
+					} else {
+						this.setState({
+							currLine: "",
+							showLyrics: true
+						})
 					}
 				}
 				line.onend = line.onend.bind(this);
@@ -113,7 +120,8 @@ export default class Boteezy extends Component {
 			this.setState({
 				lastLine: currLine.lastLine,
 				currLine: currLine,
-				nextLine: currLine.nextLine
+				nextLine: currLine.nextLine,
+				showLyrics: false
 			});
 			window.speechSynthesis.speak(currLine);
 		}
@@ -126,6 +134,13 @@ export default class Boteezy extends Component {
 			seed: seed,
 			title: rap.title,
 			rap: rap.rap
+		});
+	}
+	
+	toggleLyrics(evt) {
+		this.setState({
+			showLyrics: this.state.currLine === ""
+				|| !this.state.showLyrics
 		});
 	}
 	
@@ -253,21 +268,26 @@ export default class Boteezy extends Component {
 		return (
 			<div id='inferno-root'>
 				<div className='lyricBlock'>
-					<div onclick={this.generateNewRap}>
-						<h1> Generate </h1>
-					</div>
-					<div onclick={this.playRap}>
-						<h1> Speak it </h1>
-					</div>
 					<div className='lyrics'>
 						<h1>{(this.state.lastLine != null)? this.state.lastLine.text: ""}</h1>
 						<h2>{(this.state.currLine != null)? this.state.currLine.text: ""}</h2>
 						<h3>{(this.state.nextLine != null)? this.state.nextLine.text: ""}</h3>
 					</div>
-					<div className='full-lyrics'>
+					<div className={'full-lyrics' + ((this.state.showLyrics)? '': ' hidden')}>
 						<h3>{this.state.currOption}</h3>
 						<h3>{this.state.title}</h3>
 						{this.displayLyrics()}
+					</div>
+					<div className='btn-cntr'>
+						<div className='generate-btn' onclick={this.generateNewRap}>
+							<h1> Generate </h1>
+						</div>
+						<div className='play-btn' onclick={this.playRap}>
+							<h1> Spit Fire </h1>
+						</div>
+						<div className='toggle-btn' onclick={this.toggleLyrics}>
+							<h1> Toggle Lyrics </h1>
+						</div>
 					</div>
 				</div>
 				<Options selectGrammar={this.selectGrammar}
