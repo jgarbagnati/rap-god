@@ -179,8 +179,9 @@ export default class Boteezy extends Component {
 		let lyrics = (featuredHook)? this.state.lyrics[featuring]:
 			this.state.lyrics[artist];
 		let lastLine = "";
+		let lineEndings = [];
 		for (let i = 0; i < hookLen; ++i) {
-			lastLine = this.generateLine(lyrics, lastLine);
+			lastLine = this.generateLine(lyrics, lastLine, lineEndings);
 			hook.push(lastLine);
 		}
 		let hookArtist = (featuredHook)? featuring: artist;
@@ -208,8 +209,9 @@ export default class Boteezy extends Component {
 					lyrics = this.state.lyrics[artist];
 				}
 				lastLine = "";
+				lineEndings = [];
 			} else {
-				lastLine = this.generateLine(lyrics, lastLine);
+				lastLine = this.generateLine(lyrics, lastLine, lineEndings);
 				rap.push(lastLine);
 			}
 		}
@@ -221,7 +223,7 @@ export default class Boteezy extends Component {
 		return {title: title, rap: rap.reverse()};
 	}
 	
-	generateLine(grammar, lastLine) {
+	generateLine(grammar, lastLine, lineEndings) {
 		let gen = '';
 		let best = "";
 		let bestFitness = -1;
@@ -233,12 +235,13 @@ export default class Boteezy extends Component {
 				best = gen;
 				break;
 			}
-			let fitness = this.checkFitness(lastLine, gen);
+			let fitness = this.checkFitness(lastLine, gen, lineEndings);
 			if (fitness > bestFitness) {
 				bestFitness = fitness;
 				best = gen;
 			}
 		}
+		lineEndings.push(best.split(' ')[best.split(' ').length - 1]);
 		return best;
 	}
 
@@ -273,19 +276,34 @@ export default class Boteezy extends Component {
 	}
 	
 	// Check the fitness between two lines for search
-	checkFitness(previous, current) {
+	checkFitness(previous, current, lineEndings) {
 		if (previous === current) return 0; // Make sure we don't just repeat lines
 		let prev = previous.split(' ');
 		let curr = current.split(' ');
-		if (prev[prev.length - 1] == curr[curr.length - 1]) return 0;
-		let isRhyme = this.isRhyming(curr[curr.length - 1], prev[prev.length - 1]);
+		let prevTail = prev[prev.length - 1];
+		let currTail = curr[curr.length - 1];
+		prevTail = prevTail.split("!")[0].split("?")[0];
+		currTail = currTail.split("!")[0].split("?")[0];
+		if (prevTail == currTail) return 0;
+		let isRhyme = this.isRhyming(prevTail, currTail);
 		let rhymeFitness = (isRhyme)? 100: 0;
+		if (isRhyme) {
+			for (let i = 0; i < lineEndings.length; ++i) {
+				let temp = lineEndings[i].split("!")[0].split("?")[0];
+				if (currTail === temp) {
+					rhymeFitness = 10;
+					break;
+				}
+			}
+		}
+				
 		let sizeFitness = 60 - Math.abs(previous.length - current.length);
 		return rhymeFitness + sizeFitness;
 	}
 	
 	// Really simple rhyme detection
 	isRhyming(a,b) {
+		
 		if (a.length < 3 || b.length < 3) {
 			let min = Math.min(a.length, b.length);
 			return a.substr(a.length - min) === b.substr(b.length - min);
