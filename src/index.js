@@ -115,23 +115,26 @@ export default class Boteezy extends Component {
 			}
 		}
 		
-		if (lastLine != null) {
-			lastLine.nextLine = null;
-			let currLine = lastLine;
-			while (currLine.lastLine != null) {
-				currLine.lastLine.nextLine = currLine;
-				currLine = currLine.lastLine;
+		let ui = this;
+		SikBeat();
+		setTimeout(function() {
+			if (lastLine != null) {
+				lastLine.nextLine = null;
+				let currLine = lastLine;
+				while (currLine.lastLine != null) {
+					currLine.lastLine.nextLine = currLine;
+					currLine = currLine.lastLine;
+				}
+				ui.setState({
+					lastLine: currLine.lastLine,
+					currLine: currLine,
+					nextLine: currLine.nextLine,
+					highlightLine: currLine.keyVal,
+					showLyrics: false
+				});
+				window.speechSynthesis.speak(currLine);
 			}
-			this.setState({
-				lastLine: currLine.lastLine,
-				currLine: currLine,
-				nextLine: currLine.nextLine,
-				highlightLine: currLine.keyVal,
-				showLyrics: false
-			});
-			window.speechSynthesis.speak(currLine);
-			SikBeat();
-		}
+		}, 5000);
 	}
 	
 	generateNewRap(evt) {
