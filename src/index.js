@@ -4,6 +4,7 @@ import Options from './components/Options';
 import Tracery from './lib/tracery';
 import Lyrics from './lib/lyrics';
 import Random from 'seedrandom';
+import SikBeat from './lib/sik_beat';
 let UnSeeded = Math.random;
 
 function generateRandomSeed() {
@@ -129,6 +130,7 @@ export default class Boteezy extends Component {
 				showLyrics: false
 			});
 			window.speechSynthesis.speak(currLine);
+			SikBeat();
 		}
 	}
 	
@@ -239,6 +241,7 @@ export default class Boteezy extends Component {
 			if (fitness > bestFitness) {
 				bestFitness = fitness;
 				best = gen;
+				if (fitness > 140) break;
 			}
 		}
 		lineEndings.push(best.split(' ')[best.split(' ').length - 1]);
