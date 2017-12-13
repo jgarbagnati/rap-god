@@ -46,6 +46,10 @@ export default class Boteezy extends Component {
 			options: options,
 			titles: [],
 			lyrics: lyrics,
+			lineNode: null,
+			lastLine: "",
+			currLine: "",
+			nextLine: "",
 			currOption: defaultOption
 		};
 		
@@ -74,12 +78,44 @@ export default class Boteezy extends Component {
 		let rap = this.state.rap;
 		let i = rap.length;
 		let pitch = 1;
+		let lastLine = null;
 		while (i --> 0) {
 			if (typeof rap[i] === "string") {
-				var msg = new SpeechSynthesisUtterance(rap[i]);
-				msg.rate = 1.5;
-				window.speechSynthesis.speak(msg);
+				var line = new SpeechSynthesisUtterance(rap[i]);
+				line.rate = 1.5;
+				line.lastLine = lastLine;
+				line.onend = function(evt) {
+					let currLine = this.state.currLine;
+					let nextLine = currLine.nextLine;
+					if (nextLine != null) {						
+						let lastText = (nextLine.lastLine != null)? nextLine.lastLine.text: "";
+						let nextText = (nextLine.nextLine != null)? nextLine.nextLine.text: "";
+						this.setState({
+							lastLine: nextLine.lastLine,
+							currLine: nextLine,
+							nextLine: nextLine.nextLine,
+						});
+						window.speechSynthesis.speak(nextLine);
+					}
+				}
+				line.onend = line.onend.bind(this);
+				lastLine = line;
 			}
+		}
+		
+		if (lastLine != null) {
+			lastLine.nextLine = null;
+			let currLine = lastLine;
+			while (currLine.lastLine != null) {
+				currLine.lastLine.nextLine = currLine;
+				currLine = currLine.lastLine;
+			}
+			this.setState({
+				lastLine: currLine.lastLine,
+				currLine: currLine,
+				nextLine: currLine.nextLine
+			});
+			window.speechSynthesis.speak(currLine);
 		}
 	}
 	
@@ -223,9 +259,16 @@ export default class Boteezy extends Component {
 					<div onclick={this.playRap}>
 						<h1> Speak it </h1>
 					</div>
-					<h3>{this.state.currOption}</h3>
-					<h3>{this.state.title}</h3>
-					{this.displayLyrics()}
+					<div className='lyrics'>
+						<h1>{(this.state.lastLine != null)? this.state.lastLine.text: ""}</h1>
+						<h2>{(this.state.currLine != null)? this.state.currLine.text: ""}</h2>
+						<h3>{(this.state.nextLine != null)? this.state.nextLine.text: ""}</h3>
+					</div>
+					<div className='full-lyrics'>
+						<h3>{this.state.currOption}</h3>
+						<h3>{this.state.title}</h3>
+						{this.displayLyrics()}
+					</div>
 				</div>
 				<Options selectGrammar={this.selectGrammar}
 					options={this.state.options} />
