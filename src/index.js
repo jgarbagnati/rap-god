@@ -51,7 +51,8 @@ export default class Boteezy extends Component {
 			lastLine: "",
 			currLine: "",
 			nextLine: "",
-			currOption: defaultOption
+			currOption: defaultOption,
+			highlightLine: -1,
 		};
 		
 		let rap = this.generateRap(this.state.seed);
@@ -85,6 +86,7 @@ export default class Boteezy extends Component {
 			if (typeof rap[i] === "string") {
 				var line = new SpeechSynthesisUtterance(rap[i]);
 				line.rate = 1.5;
+				line.keyVal = i;
 				line.lastLine = lastLine;
 				line.onend = function(evt) {
 					let currLine = this.state.currLine;
@@ -96,12 +98,14 @@ export default class Boteezy extends Component {
 							lastLine: nextLine.lastLine,
 							currLine: nextLine,
 							nextLine: nextLine.nextLine,
+							highlightLine: nextLine.keyVal
 						});
 						window.speechSynthesis.speak(nextLine);
 					} else {
 						this.setState({
 							currLine: "",
-							showLyrics: true
+							showLyrics: true,
+							highlightLine: -1
 						})
 					}
 				}
@@ -121,6 +125,7 @@ export default class Boteezy extends Component {
 				lastLine: currLine.lastLine,
 				currLine: currLine,
 				nextLine: currLine.nextLine,
+				highlightLine: currLine.keyVal,
 				showLyrics: false
 			});
 			window.speechSynthesis.speak(currLine);
@@ -296,9 +301,10 @@ export default class Boteezy extends Component {
 		let out = [];
 		let i = this.state.rap.length;
 		while (i --> 0) {
+			let classNames = 'line' + ((this.state.highlightLine == i)? ' highlighted': '');
 			let line = (
 				<div key={i}
-					 className='line'>
+					className={classNames}>
 					{this.state.rap[i]}
 				</div>
 			);

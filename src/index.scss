@@ -16,6 +16,15 @@
 	background-color: white;
 	padding-top: 25px;
 	text-align: center;
+	
+	div {
+		margin-left: calc(50% - 375px);
+		width: 750px;
+	}
+	
+	.highlighted {
+		background-color: yellow;
+	}
 }
 
 .lyrics {
