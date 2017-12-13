@@ -173,12 +173,16 @@ export default class Boteezy extends Component {
 		let featuredHook = isFeaturing && (Math.random() * 4 << 0) == 0;
 		let lyrics = (featuredHook)? this.state.lyrics[featuring]:
 			this.state.lyrics[artist];
-		for (let i = 0; i < hookLen; ++i)
-			hook.push(this.generateLine(lyrics));
+		let lastLine = "";
+		for (let i = 0; i < hookLen; ++i) {
+			lastLine = this.generateLine(lyrics, lastLine);
+			hook.push(lastLine);
+		}
 		let hookArtist = (featuredHook)? featuring: artist;
 		
 		if (hookCounter > 0 && isFeaturing) rap.push(<b>{artist}:</b>);
 		lyrics = this.state.lyrics[artist];
+		lastLine = "";
 		for (let i = 0; i < rapLen; ++i) {
 			if (--hookCounter <= 0) {
 				// Generate from above offset
@@ -198,8 +202,10 @@ export default class Boteezy extends Component {
 					if (isFeaturing) rap.push(<b>{artist}:</b>);
 					lyrics = this.state.lyrics[artist];
 				}
+				lastLine = "";
 			} else {
-				rap.push(this.generateLine(lyrics));
+				lastLine = this.generateLine(lyrics, lastLine);
+				rap.push(lastLine);
 			}
 		}
 		
@@ -210,12 +216,25 @@ export default class Boteezy extends Component {
 		return {title: title, rap: rap.reverse()};
 	}
 	
-	generateLine(grammar) {
+	generateLine(grammar, lastLine) {
 		let gen = '';
-		do {
-			gen = this.postProcessLyrics(grammar.flatten('#origin#'));
-		} while (gen.length == 0);
-		return gen;
+		let best = "";
+		let bestFitness = -1;
+		for (let i = 0; i < 500; ++i) {
+			do {
+				gen = this.postProcessLyrics(grammar.flatten('#origin#')).trim();
+			} while (gen.length == 0);
+			if (lastLine === "") {
+				best = gen;
+				break;
+			}
+			let fitness = this.checkFitness(lastLine, gen);
+			if (fitness > bestFitness) {
+				bestFitness = fitness;
+				best = gen;
+			}
+		}
+		return best;
 	}
 
 	// Post processing
@@ -243,9 +262,34 @@ export default class Boteezy extends Component {
 		return "";
 	}
 
-	// Check if we're between 100 and 140 characters.
+	// Check if we're between 20 and 80 characters.
 	checkLength(str, upperbound, lowerbound) {
 		return lowerbound(str) && upperbound(str);
+	}
+	
+	// Check the fitness between two lines for search
+	checkFitness(previous, current) {
+		if (previous === current) return 0; // Make sure we don't just repeat lines
+		let prev = previous.split(' ');
+		let curr = current.split(' ');
+		if (prev[prev.length - 1] == curr[curr.length - 1]) return 0;
+		let isRhyme = this.isRhyming(curr[curr.length - 1], prev[prev.length - 1]);
+		let rhymeFitness = (isRhyme)? 100: 0;
+		let sizeFitness = 60 - Math.abs(previous.length - current.length);
+		return rhymeFitness + sizeFitness;
+	}
+	
+	// Really simple rhyme detection
+	isRhyming(a,b) {
+		if (a.length < 3 || b.length < 3) {
+			let min = Math.min(a.length, b.length);
+			return a.substr(a.length - min) === b.substr(b.length - min);
+		};
+		let asub = a.split('...')[0].substr(a.length - 3);
+		let bsub = b.split('...')[0].substr(b.length - 3);
+		if (asub === "in'") asub = "ing";
+		if (bsub === "in'") bsub = "ing";
+		return asub === bsub;
 	}
 	
 	displayLyrics() {
