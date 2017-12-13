@@ -3,6 +3,23 @@ import Component from 'inferno-component';
 import Options from './components/Options';
 import Tracery from './lib/tracery';
 import Lyrics from './lib/lyrics';
+import Random from 'seedrandom';
+let UnSeeded = Math.random;
+
+function generateRandomSeed() {
+	let safeVals = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	let seed = "";
+	while(seed.length < 20)
+		seed += safeVals.charAt(Math.floor(UnSeeded() * safeVals.length));
+	
+	window.location.hash = '#' + seed;
+	return seed;
+}
+
+function getCurrentSeed() {
+	let hash = window.location.hash;
+	return (hash.length > 0)? hash.substr(1): generateRandomSeed();
+}
 
 export default class Boteezy extends Component {
 	constructor(props) {
@@ -22,6 +39,7 @@ export default class Boteezy extends Component {
 		}
 		
 		this.state = {
+			seed: getCurrentSeed(),
 			title: '',
 			rap: [],
 			postCount: 0,
@@ -31,9 +49,18 @@ export default class Boteezy extends Component {
 			currOption: defaultOption
 		};
 		
+		let rap = this.generateRap(this.state.seed);
+		this.state.title = rap.title;
+		this.state.rap = rap.rap;
+		
 		this.selectGrammar = this.selectGrammar.bind(this);
-		this.generateRap = this.generateRap.bind(this);
+		this.generateNewRap = this.generateNewRap.bind(this);
 		this.displayLyrics = this.displayLyrics.bind(this);
+	}
+	
+	seedRNG(seed) {
+		Math.random = new Math.seedrandom(seed);
+		Tracery.setRng(Math.random);
 	}
 	
 	selectGrammar(grammar) {
@@ -42,7 +69,21 @@ export default class Boteezy extends Component {
 		});
 	}
 	
-	generateRap(evt) {
+	generateNewRap(evt) {
+		let seed = generateRandomSeed();
+		let rap = this.generateRap(seed);
+		this.setState({
+			seed: seed,
+			title: rap.title,
+			rap: rap.rap
+		});
+	}
+	
+	generateRap(seed) {
+		// Set Random Number Generator
+		this.seedRNG(seed);
+		
+		// Grab artist
 		let artists = Object.keys(this.state.lyrics);
 		let artist = this.state.currOption;
 		
@@ -101,10 +142,7 @@ export default class Boteezy extends Component {
 		let title = hook[Math.random() * hookLen << 0];
 		title += (hasFeatured)? " (ft. " + featuring + ")":"";
 		
-		this.setState({
-			title: title,
-			rap: rap.reverse()
-		});
+		return {title: title, rap: rap.reverse()};
 	}
 	
 	generateLine(grammar) {
@@ -165,7 +203,7 @@ export default class Boteezy extends Component {
 		return (
 			<div id='inferno-root'>
 				<div className='lyricBlock'>
-					<div onclick={this.generateRap}>
+					<div onclick={this.generateNewRap}>
 						<h1> Generate </h1>
 					</div>
 					<h3>{this.state.currOption}</h3>
