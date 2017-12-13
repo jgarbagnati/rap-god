@@ -1,4 +1,4 @@
-// Make your rules in a file called rules.js
+// Make your rules for the various title generators in a file called titles.js
 // export them in a js object.
 
 // This is an example built from lorem ipsum doler
