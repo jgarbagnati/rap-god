@@ -53,6 +53,7 @@ export default class Boteezy extends Component {
 		this.state.title = rap.title;
 		this.state.rap = rap.rap;
 		
+		this.playRap = this.playRap.bind(this);
 		this.selectGrammar = this.selectGrammar.bind(this);
 		this.generateNewRap = this.generateNewRap.bind(this);
 		this.displayLyrics = this.displayLyrics.bind(this);
@@ -67,6 +68,19 @@ export default class Boteezy extends Component {
 		this.setState({
 			currOption: grammar
 		});
+	}
+	
+	playRap() {
+		let rap = this.state.rap;
+		let i = rap.length;
+		let pitch = 1;
+		while (i --> 0) {
+			if (typeof rap[i] === "string") {
+				var msg = new SpeechSynthesisUtterance(rap[i]);
+				msg.rate = 1.5;
+				window.speechSynthesis.speak(msg);
+			}
+		}
 	}
 	
 	generateNewRap(evt) {
@@ -205,6 +219,9 @@ export default class Boteezy extends Component {
 				<div className='lyricBlock'>
 					<div onclick={this.generateNewRap}>
 						<h1> Generate </h1>
+					</div>
+					<div onclick={this.playRap}>
+						<h1> Speak it </h1>
 					</div>
 					<h3>{this.state.currOption}</h3>
 					<h3>{this.state.title}</h3>
