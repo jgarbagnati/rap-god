@@ -4,6 +4,7 @@ import Options from './components/Options';
 import Tracery from './lib/tracery';
 import Lyrics from './lib/lyrics';
 import Random from 'seedrandom';
+import SikBeat from './lib/sik_beat';
 let UnSeeded = Math.random;
 
 function generateRandomSeed() {
@@ -114,22 +115,26 @@ export default class Boteezy extends Component {
 			}
 		}
 		
-		if (lastLine != null) {
-			lastLine.nextLine = null;
-			let currLine = lastLine;
-			while (currLine.lastLine != null) {
-				currLine.lastLine.nextLine = currLine;
-				currLine = currLine.lastLine;
+		let ui = this;
+		SikBeat();
+		setTimeout(function() {
+			if (lastLine != null) {
+				lastLine.nextLine = null;
+				let currLine = lastLine;
+				while (currLine.lastLine != null) {
+					currLine.lastLine.nextLine = currLine;
+					currLine = currLine.lastLine;
+				}
+				ui.setState({
+					lastLine: currLine.lastLine,
+					currLine: currLine,
+					nextLine: currLine.nextLine,
+					highlightLine: currLine.keyVal,
+					showLyrics: false
+				});
+				window.speechSynthesis.speak(currLine);
 			}
-			this.setState({
-				lastLine: currLine.lastLine,
-				currLine: currLine,
-				nextLine: currLine.nextLine,
-				highlightLine: currLine.keyVal,
-				showLyrics: false
-			});
-			window.speechSynthesis.speak(currLine);
-		}
+		}, 5000);
 	}
 	
 	generateNewRap(evt) {
@@ -239,6 +244,7 @@ export default class Boteezy extends Component {
 			if (fitness > bestFitness) {
 				bestFitness = fitness;
 				best = gen;
+				if (fitness > 140) break;
 			}
 		}
 		lineEndings.push(best.split(' ')[best.split(' ').length - 1]);
